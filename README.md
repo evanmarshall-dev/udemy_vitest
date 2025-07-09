@@ -61,3 +61,55 @@ Once it is imported it allows you to use **matchers** specific to the DOM. The a
 - `toBeVisible()`
 - `toBeChecked()`
 - `toBeInTheDocument()`
+
+## Module: How Tests Work
+
+There is a division of responsibilities between React Testing Library (RTL) and Jest/Vitest.
+
+RTLs job is to create a **simulated DOM** for your components which you can then use for _interactions_ and _assertions_.
+
+You _cannot_ use RTL without a test runner. A test runner will _find_ the tests, _run_ the test, and make _assertions_. This is where Jest/Vitest comes in.
+
+> [!NOTE]
+>
+> - Vitest is 3x - 5x faster than Jest.
+> - Jest is harder to configure for Vite.
+> - However Jest tends to work better with Next.js.
+> - Less advanced syntax is virtually identical between the two test runners, only the setup differs.
+
+Both Jest/Vitest have a **global** `test` method that takes two _arguments_:
+
+1. A string description of the test.
+2. A test function to run for test pass/fail.
+
+The test fails if there is an error when the second _argument_ function runs.
+
+**Assertions** _throw errors_ when the expectation fails. If no error thrown then the test passes (Meaning an empty test passes or a test where everything inside the **global** `test` method is empty).
+
+```jsx
+// OTHER CODE...
+
+// Empty Test.
+test("Empty Test", () => {});
+
+// Throw Error Explicitly.
+test("Test throws error explicitly", () => {
+  throw new Error("Fail this test!");
+});
+```
+
+With RTL the part of the code that will throw an error is the **assertion**.
+
+```jsx
+// OTHER CODE...
+
+// RTL Assertion Error.
+test("App contains correct heading", () => {
+  render(<App />);
+  const headingElement = screen.getByText(/learn react/i);
+  // Error thrown with .not.
+  expect(headingElement).not.toBeInTheDocument();
+});
+```
+
+## Module: Test Driven Development (TDD)
