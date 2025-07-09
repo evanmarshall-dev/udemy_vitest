@@ -35,3 +35,29 @@ test("App contains correct heading", () => {
 > Running Vitest in `--watch` mode will auto re-run test when a change has been made.
 
 ## Module: Assertions
+
+**Assertions** determine whether a test passes or fails.
+
+### Syntax of an Assertion
+
+- `expect`: All assertions start with an `expect` method which is a **global** in Jest or Vitest.
+- `expect(argument)`: The _argument_ is what you are asserting against. It is what Vitest will examine to see if it meets our expectation.
+- `toBeInTheDocument`: Is a **matcher** and is what the assertion **type** is.
+- `toBeInTheDocument(argument)`: Sometimes there is an _argument_ passed into the **matcher**. To be in the document does not have an _argument_ (It is either in the document or not). Sometimes you are comparing the element to some sort of known quantity which would need an _argument_.
+
+### More Examples of Assertion
+
+- `expect(element.textContent).toBe('hello');`: Most likely using a screen method to find the element on the page. Text content is self explanatory and the **matcher** (`toBe`) takes a _argument_ for an exact string (i.e. `hello`).
+- `expect(elementsArray).toHaveLength(7);`: The `elementsArray` would have been defined in the previous line. It has a **matcher** of `toHaveLength` with an _argument_ of `7`.
+
+### jest-DOM
+
+Can also be used with Vitest as well as Jest. If it is used it needs to be _imported_ prior to each test in order to be able to use the **matchers** with **jest-DOM**.
+
+Both Jest and/or Vitest use a setup file to import the **jest-DOM** for each test (`/src/setupTests.js`).
+
+Once it is imported it allows you to use **matchers** specific to the DOM. The above examples show more general **matchers**. Below are DOM-specific **matchers**:
+
+- `toBeVisible()`
+- `toBeChecked()`
+- `toBeInTheDocument()`
