@@ -188,7 +188,7 @@ Other accessibility options if `getByRole` is not available (i.e. for form input
 
 Back in our code for `App.test.jsx` we are using the frowned upon `getByText` method. We can switch it to an **ARIA: heading role** to utilize accessibility handles. When you use `getByRole` there are several options, but the most common one to use is `name` which can also take either a regex or string.
 
-For example:
+**_For example_**:
 
 ```jsx
 // file: ./src/App.test.jsx
@@ -251,7 +251,7 @@ Let's say you did not know the role was button we can use `logRoles` from **test
 1. If we want to see what the roles are in the app we can **destructure** `container` from the output of the `render`: `const { container } = render(<App />);`.
 2. Run `logRoles` on the above `container`: `logRoles(container);`.
 
-**_For Example_**:
+**_For example_**:
 
 ```jsx
 // file: ./src/App.test.jsx
@@ -289,3 +289,95 @@ Name "Change to blue":
 
 > [!NOTE]
 > It is not much because of only one component, but useful in large apps when you are not sure of all the **roles**.
+
+### Module: Test Behaviour with Button Click
+
+It is common to have longer tests with multiple _assertions_ that test a particular flow.
+
+To click the button we can use `fireEvent` from **testing library react** (There is a more involved `userEvent` which we will look at later).
+
+1. Add `fireEvent` and append `.click()` method.
+2. Pass in what to click, which is the `buttonElement`.
+3. Skip down a step and add the assertion to check button color after click. We will use the same as before click, but `toHaveClass` of blue instead of red: `expect(buttonElement).toHaveClass("blue");`.
+4. For checking the button text we will be using a new _matcher_ from **jest-DOM** (`toHaveTextContent`). We always start an assertion with `expect`, then we will pass in the `buttonElement`, append `.toHaveTextContent()`, and pass a regex for text of `red` into the new _matcher_: `expect(buttonElement).toHaveTextContent(/red/i);`.
+
+Since we are currently in the red portion of _red-green_ testing the test will _fail_. When the button is clicked the text content does not include regex of red.
+
+**_For example_**:
+
+```jsx
+// file: ./src/App.test.jsx
+
+// OTHER CODE...
+
+test("Button click flow", () => {
+  // Render the app.
+  render(<App />);
+  // Find the button.
+  const buttonElement = screen.getByRole("button", {
+    name: /blue/i,
+  });
+  // Check initial color.
+  expect(buttonElement).toHaveClass("red");
+
+  // Click the button.
+  fireEvent.click(buttonElement);
+
+  // Check button text.
+  expect(buttonElement).toHaveTextContent(/red/i);
+
+  // Check button color.
+  expect(buttonElement).toHaveClass("blue");
+});
+```
+
+### Module: Change Button Color on Click with React
+
+We just finished the failing/red code for testing.
+
+1. Go to `App.jsx` and within the `App` component we will use **state** to track what the button color is.
+2. Assign `useState` to **destructured** `buttonColor` **state variable** and `setButtonColor` **setter function**. The initial state for the button will be `"red"`: `const [buttonColor, setButtonColor] = useState("red");`.
+3. Instead of the button `className` being `"red"` we will assign it to whatever the **state variable** `buttonColor` is: `<button className={buttonColor}>Change to blue</button>`.
+4. The button text content will display whatever the opposite of the button color is. We can derive that from the current state and call it `nextColor`. _If_ the button color is red (`buttonColor === "red"`) _then_ next color is blue (`? "blue"`), _else_ the next color is red (`: "red"`) using **ternary** operators: `const nextColor = buttonColor === "red" ? "blue" : "red";`.
+5. We now have to give the button an on click event. The `onClick` takes a _return_ function that returns the **setter function** (`setButtonColor`) with a value passed in of `nextColor`: `<button className={buttonColor} onClick={() => setButtonColor(nextColor)}>`. We change the color button state to whatever the `nextColor` is on click.
+6. Lastly, we need to make the blue class and set styles in `App.css`.
+
+For example:
+
+```jsx
+// file: ./src/App.jsx
+
+// OTHER CODE...
+
+function App() {
+  // State variables.
+  const [buttonColor, setButtonColor] = useState("red");
+
+  // Constants.
+  const nextColor = buttonColor === "red" ? "blue" : "red";
+
+  return (
+    <div>
+      {/* <button className="red">Change to blue</button> */}
+      {/* <button className={buttonColor}>Change to blue</button> */}
+      <button className={buttonColor} onClick={() => setButtonColor(nextColor)}>
+        Change to {nextColor}
+      </button>
+    </div>
+  );
+}
+
+// OTHER CODE...
+```
+
+> [!NOTE]
+> You will notice that the tests pass even before we add the blue button color styles. It is quite complicated to test for actual styles versus testing for classes.
+
+#### Testing for Styles
+
+To test for styles you need to make sure the css is being interpreted as part of your tests.
+
+- In the `vite.config.js` it is one line that says: `css: true,`.
+- With Jest it is quite slow and requires some extra plugins.
+- It is not always obvious what the styles come out as. For example if we switch the last _assertion_ in our test to: `expect(buttonElement).toHaveStyle({"background-color": "blue"});` then it will `fail` because the blue style will render as an RGB value (`rgb(0, 0, 255)`) instead of `"blue"`.
+- It is more straightforward to just test for classes and use **visual regression testing** to catch any visual style (More advanced).
