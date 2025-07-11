@@ -4,7 +4,7 @@
 >
 > [Course GitHub Repo](https://github.com/bonnie/udemy-TESTING-LIBRARY/tree/main)
 
-## Module: First Test
+## Module: First Test :1st_place_medal:
 
 1. complete environment setup found in the `README.md` in **vite-starter** in the course repo.
 
@@ -15,6 +15,8 @@ This file contains a test for the `App` component to be run in the CLI using: `p
 Breaking down the syntax:
 
 ```jsx
+// file: ./src/App.test.jsx
+
 import { render, screen } from "@testing-library/react";
 import App from "./App";
 
@@ -34,7 +36,7 @@ test("App contains correct heading", () => {
 > [!NOTE]
 > Running Vitest in `--watch` mode will auto re-run test when a change has been made.
 
-## Module: Assertions
+## Module: Assertions :fist_raised:
 
 **Assertions** determine whether a test passes or fails.
 
@@ -62,7 +64,7 @@ Once it is imported it allows you to use **matchers** specific to the DOM. The a
 - `toBeChecked()`
 - `toBeInTheDocument()`
 
-## Module: How Tests Work
+## Module: How Tests Work :construction_worker_man:
 
 There is a division of responsibilities between React Testing Library (RTL) and Jest/Vitest.
 
@@ -87,6 +89,8 @@ The test fails if there is an error when the second _argument_ function runs.
 **Assertions** _throw errors_ when the expectation fails. If no error thrown then the test passes (Meaning an empty test passes or a test where everything inside the **global** `test` method is empty).
 
 ```jsx
+// file: ./src/App.test.jsx
+
 // OTHER CODE...
 
 // Empty Test.
@@ -101,6 +105,8 @@ test("Test throws error explicitly", () => {
 With RTL the part of the code that will throw an error is the **assertion**.
 
 ```jsx
+// file: ./src/App.test.jsx
+
 // OTHER CODE...
 
 // RTL Assertion Error.
@@ -112,4 +118,86 @@ test("App contains correct heading", () => {
 });
 ```
 
-## Module: Test Driven Development (TDD)
+## Module: Test Driven Development (TDD) :test_tube:
+
+Writing tests _before_ writing the code then write the code according to specs set by the tests to make the tests _pass_.
+
+### Red-Green Testing
+
+You want the tests to _fail_ (red tests) _before_ the code is written the _after_ the code is written you see _passing_ tests (green tests).
+
+1. You write an empty function or empty functional React component.
+2. You write your tests and expect them to _fail_ because empty functions.
+3. Write your code and expect the tests to _pass_.
+
+## Module: React Testing Library (RTL) Philosophy :man_student:
+
+It is **opinionated** or drives you towards best practices when React testing.
+
+### What Does RTL Do?
+
+- Creates a **virtual DOM** for testing.
+  - Provides utilities for interacting with said DOM (i.e. Find elements in the DOM or interact with elements).
+- Allows for testing _without_ a browser.
+
+### Types of Tests
+
+- Unit Tests.
+  - Test one unit of code in isolation.
+- Integration Tests.
+  - Tests how multiple units work together (i.e. Interaction between components).
+- Functional Tests.
+  - Tests a particular function of the software (You are not testing your code but rather its behaviour). RTL _encourages_ this type of test.
+- Acceptance/End-to-End Tests (E2E).
+  - These tests require a browser and server that your app is connected to (Require a special tool such as Cypress or Selenium). RTL is _not_ built for these types of tests.
+
+## Module: Functional Testing vs Unit Testing :bar_chart:
+
+### Unit Testing
+
+With unit testing you want your tests to be as isolated as possible. You do this by _mocking_ your components dependencies (Use test version of a function for example that the component relies on). Sometimes you also test _internals_ (i.e. Testing differences it made to the state because you do not have other components to see what it did to the app).
+
+**Pro**: Since unit testing is isolated it is easier to pinpoint _failures_.
+
+**Con**: It is further from how a user would interact with your software. It is also more likely to break with _refactoring_ (Refactoring: Change how code is written, but not its functionality and with unit testing you are testing how the code is written).
+
+### Functional Testing (RTL Preferred)
+
+With functional testing you include all relevant units for a particular behaviour or user flow.
+
+**Pro**: Close to how a user would interact with your software. They are also more robust tests so if you refactor it should still _pass_.
+
+**Con**: More difficult to debug failing tests because they aren't as tightly coupled to the code.
+
+> [!NOTE]
+> There is also such thing as **Behaviour Driven Development (BDD)**, but it requires multiple teams and collaboration.
+
+## Module: How Testing Library Finds Elements on the Page :fire:
+
+Testing library suggests to find elements using **accessibility** handles. This is a better way to test as well as ensuring that your app is accessible to users.
+
+`getByRole` is the top **priority** recommended. Some roles are: [MDN ARIA Roles](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Techniques).
+
+Other accessibility options if `getByRole` is not available (i.e. for form inputs) you can use `getByLabelText` or `getByPlaceholderText`.
+
+**Semantic queries** such as `getByAltText` and `getByTitle` are also good.
+
+**Test IDs** are a last resort (i.e. `getByTestID`).
+
+Back in our code for `App.test.jsx` we are using the frowned upon `getByText` method. We can switch it to an **ARIA: heading role** to utilize accessibility handles. When you use `getByRole` there are several options, but the most common one to use is `name` which can also take either a regex or string.
+
+For example:
+
+```jsx
+// file: ./src/App.test.jsx
+
+// OTHER CODE...
+
+test("App contains correct heading", () => {
+  render(<App />);
+  // const headingElement = screen.getByText(/learn react/i);
+  // SWITCH TO ROLE
+  const headingElement = screen.getByRole("heading", { name: /learn react/i });
+  expect(headingElement).toBeInTheDocument();
+});
+```
