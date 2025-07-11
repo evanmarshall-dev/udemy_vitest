@@ -1,7 +1,9 @@
+import "./App.css";
+
 function App() {
   return (
     <div>
-      <h1>I'm gonna learn React Testing Library</h1>
+      <button className="red">Change to blue</button>
     </div>
   );
 }
