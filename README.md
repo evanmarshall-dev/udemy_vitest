@@ -381,3 +381,66 @@ To test for styles you need to make sure the css is being interpreted as part of
 - With Jest it is quite slow and requires some extra plugins.
 - It is not always obvious what the styles come out as. For example if we switch the last _assertion_ in our test to: `expect(buttonElement).toHaveStyle({"background-color": "blue"});` then it will `fail` because the blue style will render as an RGB value (`rgb(0, 0, 255)`) instead of `"blue"`.
 - It is more straightforward to just test for classes and use **visual regression testing** to catch any visual style (More advanced).
+
+### Module: Button and Checkbox Test
+
+Now we will add a checkbox that when checked the button is disabled and enabled when unchecked.
+
+We will make a new test to separate the button click flow from the checkbox flow.
+
+1. Back in `App.test.jsx` we will add a new test. Start with using `test` global from **Vitest** which takes two _arguments_ (1. The _name_ of the test, 2. _function_ for pass/fail): `test("Checkbox flow", () => {});`.
+2. Start by _rendering_ something, usually a component: `render(<App />);`.
+3. We need to find the button and the checkbox because we want to check initially that the checkbox is checked and the button is enabled.
+4. Find button by using the `screen` object (That has access to the **simulated DOM** that the `render` created). We then append `.getByRole()` and pass in `"button"`, and second _argument_ is the expectant name as regex blue (Because the button starts out red and changes to blue): `const buttonElement = screen.getByRole("button", { name: /blue/i });`.
+5. Find the checkbox. Follow the same steps as finding the button, use **checkbox role** passed into `getByRole()`, second _argument_ being `name` (Even though `name` is not necessary because there is only one checkbox on the page), and assign to variable `checkboxElement`. The `name` will be the accessible name for the checkbox which will be the label for the input: `const checkboxElement = screen.getByRole("checkbox", {name: /disable button/i,});`.
+6. Initial conditions are the button enabled and checkbox unchecked. Start by creating an _assertion_ which starts with an `expect`. Pass in `buttonElement` to `expect` and append a **matcher** to this (i.e. `toBeEnabled` for button and `toBeChecked` for checkbox). The `toBeEnabled()` has no _argument_ because it is either enabled or disabled: `expect(buttonElement).toBeEnabled();`.
+7. Another assertion that checks NOT condition for `toBeChecked` since there is no built in `toNotBeChecked`: `expect(checkboxElement).not.toBeChecked();`.
+
+**_For example_**:
+
+```jsx
+// file: ./src/App.test.jsx
+
+// OTHER CODE...
+
+test("Checkbox flow", () => {
+  render(<App />);
+
+  // Find elements.
+  const buttonElement = screen.getByRole("button", { name: /blue/i });
+  const checkboxElement = screen.getByRole("checkbox", {
+    name: /disable button/i,
+  });
+
+  // Check initial conditions.
+  expect(buttonElement).toBeEnabled();
+  expect(checkboxElement).not.toBeChecked();
+});
+```
+
+Check that the tests are currently _red_ (It cannot find the checkbox because it has not be created yet).
+
+#### Add the React code
+
+1. Go to `App.jsx` and add a checkbox input. Make sure to add `id` of `disabled-button-checkbox` (This will make it accessible to screen readers and our tests).
+2. Set the checkbox to not be checked by default: `<input type="checkbox" id="disabled-button-checkbox" defaultChecked={false} />`.
+3. Add label and associate it to the checkbox input id using `htmlFor`: `<label htmlFor="disable-button-checkbox">Disable Button</label>`.
+
+**_For example_**:
+
+```jsx
+// file: ./src/App.jsx
+
+// OTHER CODE...
+
+<input
+  type="checkbox"
+  id="disable-button-checkbox"
+  defaultChecked={false}
+/>
+<label htmlFor="disable-button-checkbox">Disable Button</label>
+
+// OTHER CODE...
+```
+
+Now the tests are passing or _green_.
