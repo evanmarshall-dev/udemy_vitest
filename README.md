@@ -444,3 +444,134 @@ Check that the tests are currently _red_ (It cannot find the checkbox because it
 ```
 
 Now the tests are passing or _green_.
+
+### Module: Code Quiz Button Checkbox Logic and Test
+
+#### Tests
+
+- Add to the _current_ test.
+- We want to use `fireEvent` _twice_. When the checkbox is checked and when the checkbox is unchecked.
+- Check that the button is enabled when checkbox is unchecked (Done) and that the button is disabled when the checkbox is checked.
+- For _assertion_ **matchers** on the button we will again use `toBeEnabled()` and `toBeDisabled()`.
+
+#### React Logic
+
+- Checkbox controls the button via a boolean state.
+- State will determine the value of `disabled` attribute on the button.
+- Calling the state variable `disabled` and initial value of state to be set to `false`.
+- The onChange for the checkbox will set that state to whether the target (checkbox) of the event is checked or not: `{(e) => setDisabled(e.target.checked)}`.
+
+#### Code Quiz Solution
+
+1. Add to the checkbox flow test.
+2. Use `fireEvent.click` on the `checkboxElement` followed by _expectation_ that the `buttonElement` will be `disabled`.
+3. Use `fireEvent.click` on the `checkboxElement` again followed by an _expectation_ that the `buttonElement` will be re-enabled.
+
+**_For example_**:
+
+```jsx
+// file: ./src/App.test.jsx
+
+// OTHER CODE...
+
+test("Checkbox flow", () => {
+  render(<App />);
+
+  // Find elements.
+  const buttonElement = screen.getByRole("button", { name: /blue/i });
+  const checkboxElement = screen.getByRole("checkbox", {
+    name: /disable button/i,
+  });
+
+  // Check initial conditions.
+  expect(buttonElement).toBeEnabled();
+  expect(checkboxElement).not.toBeChecked();
+
+  // Check the checkbox to disable button.
+  fireEvent.click(checkboxElement);
+  expect(buttonElement).toBeDisabled();
+
+  // Click checkbox again to re-enable button.
+  fireEvent.click(checkboxElement);
+  expect(buttonElement).toBeEnabled();
+});
+```
+
+1. Create new state called `isDisabled`: `const [isDisabled, setIsDisabled] = useState("false");`.
+2. The `defaultChecked` prop (Checked or unchecked) on the checkbox will rely on the state `isDisabled`: `<input defaultChecked={isDisabled} />`.
+3. When the checkbox changes (`onChange`) we update the state: `<input onChange={(e) => setIsDisabled(e.target.checked)} />`.
+4. Also use the `isDisabled` state to determine whether the button is disabled or not: `<button disabled={isDisabled}>...</button>`.
+
+**_For example_**:
+
+```jsx
+// file: ./src/App.jsx
+
+// OTHER CODE...
+
+const [buttonDisabled, setButtonDisabled] = useState(false);
+
+// OTHER CODE...
+
+<button
+  className={buttonColor}
+  onClick={() => setButtonColor(nextColor)}
+  disabled={buttonDisabled}
+>
+  Change to {nextColor}
+</button>
+<br />
+<input
+  type="checkbox"
+  id="disable-button-checkbox"
+  // defaultChecked={disabled}
+  checked={buttonDisabled}
+  onChange={(e) => setButtonDisabled(e.target.checked)}
+/>
+
+// OTHER CODE...
+```
+
+#### Code Quiz 2 Solution (Button Grey when Disabled)
+
+1. Add _assertion_ when checkbox is checked to check if button has class of `"gray"`: `expect(buttonElement).toHaveClass("gray");`. Add to original checkbox flow.
+2. Add _assertion_ when checkbox is unchecked to check if button has class of `"red"`: `expect(buttonElement).toHaveClass("red");`. Add to original checkbox flow.
+3. Create a new checkbox flow for what happens after the button has been clicked (i.e. turns blue). The new checkbox flow will be the same as original except that we add a `fireEvent.click(buttonElement)` after we find the elements and remove the checking of initial conditions for checkbox and button.
+
+**_For example_**:
+
+```jsx
+// file: ./src/App.test.jsx
+
+// OTHER CODE...
+
+test("Checkbox flow after button clicked", () => {
+  render(<App />);
+
+  // Find elements.
+  const buttonElement = screen.getByRole("button", { name: /blue/i });
+  const checkboxElement = screen.getByRole("checkbox", {
+    name: /disable button/i,
+  });
+
+  // Click the button.
+  fireEvent.click(buttonElement);
+
+  // Check the checkbox to disable button.
+  fireEvent.click(checkboxElement);
+  expect(buttonElement).toBeDisabled();
+  expect(buttonElement).toHaveClass("gray");
+
+  // Click checkbox again to re-enable button.
+  fireEvent.click(checkboxElement);
+  expect(buttonElement).toBeEnabled();
+  expect(buttonElement).toHaveClass("red");
+});
+```
+
+> [!TIP]
+> For test code it is less important for the code to be **DRY** than being able to debug failing tests quickly (Readable).
+
+1. Create `className` constant equal to condition of `buttonDisabled` would be `"gray"` and if not it will be set to whatever the `buttonColor` state is: `const className = buttonDisabled ? "gray" : buttonColor;`.
+2. Assign the constant `className` to the `className` of the button: `<button className={className}>...</button>`.
+3. Add styles to `App.css` for the background color of gray.

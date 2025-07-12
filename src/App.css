@@ -5,3 +5,7 @@
 .blue {
   background-color: oklch(45.203% 0.3133 264.073);
 }
+
+.gray {
+  background-color: oklch(59.987% 0.00007 271.152);
+}
