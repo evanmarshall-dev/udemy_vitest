@@ -9,3 +9,11 @@
 .gray {
   background-color: oklch(59.987% 0.00007 271.152);
 }
+
+.medium-violet-red {
+  background-color: oklch(55.335% 0.2217 349.67);
+}
+
+.midnight-blue {
+  background-color: oklch(28.813% 0.14368 272.778);
+}

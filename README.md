@@ -575,3 +575,84 @@ test("Checkbox flow after button clicked", () => {
 1. Create `className` constant equal to condition of `buttonDisabled` would be `"gray"` and if not it will be set to whatever the `buttonColor` state is: `const className = buttonDisabled ? "gray" : buttonColor;`.
 2. Assign the constant `className` to the `className` of the button: `<button className={className}>...</button>`.
 3. Add styles to `App.css` for the background color of gray.
+
+### Module: Unit Testing Functions
+
+Sometimes you will have functions separate from components due to being used by several other components or because it is complex and needs modularity.
+
+If we were to use more complicated colors classes (i.e. `.midnight-blue`) it will work when we have to set the button color (`useState=("midnight-blue")`), but it will not look great when we are looking at the button text.
+
+1. Create a file called `helpers.js`.
+2. Within helpers.js add an export for a function that converts kebab case to title case. Leave the function empty: `export function kebabCaseToTitleCase() {}`.
+3. In the `App.test.jsx` we are going to add a new _global_ called `describe()` (A way to group tests). It takes the same two arguments as `test()` and it allows us to _route_ multiple tests within it's second _argument_ function.
+4. Within describes second argument we will add a test for if it works with no hyphens, one hyphen, and multiple hyphens.
+5. In the _no hyphen_ test we write an _assertion_ to `expect` kebab case helper function lowercase `"red"` to be uppercase `"Red"`: `expect(kebabCaseToTitleCase("red")).toBe("Red");`.
+6. For _one hyphen_ we will look at `midnight-blue` class name, which is what we will be working with in the _state_. We will use the helper function to translate that to `"Midnight Blue"`.
+7. Lastly, for _multiple hyphens_ we will look at `medium-violet-red` class name.
+
+We will have 6 _failing_ tests at this point due to the `buttonColor` name changes and the three grouped tests in the **describe global**.
+
+#### Write the Helper Function Code
+
+1. The `kebabCaseToTitleCase()` function needs to take an argument (i.e. `colorName`).
+2. We will replace the hyphens with spaces: `const colorWithSpaces = colorName.replaceAll("-", " ");`.
+3. Change the beginning letter of each word to a capitalized letter. We will pass in a regex to this with _out of word boundary_ (`/\b`), a _lowercase letter_ (`([a-z])`) in parenthesis so we can catch the lowercase letter, _find them all_ (`/g`), and replace with whatever the `match` was _to uppercase_ (`match.toUpperCase()`).
+4. Then we will return the result (`colorWithCaps`).
+
+**_For example_**:
+
+```jsx
+// file: ./src/helpers.js
+
+export function kebabCaseToTitleCase(colorName) {
+  const colorWithSpaces = colorName.replaceAll("-", " ");
+  const colorWithCaps = colorWithSpaces.replace(/\b([a-z])/g, (match) =>
+    match.toUpperCase()
+  );
+
+  return colorWithCaps;
+}
+```
+
+Now all of the **unit tests** will be passing.
+
+### Module: Code Quiz Colors with Spaces
+
+#### Tests 2
+
+- Check that color starts with `mediumvioletred` and changes to `midnightblue`.
+- Update existing tests.
+- After updating the class names in the `toHaveClass` _assertions_ the checkbox disabling tests should still pass (free regression testing / free testing when code changes).
+
+#### Code Quiz Solution 2
+
+> [!NOTE]
+> We do not have to change any of the `name` options because they are not very specific (Had keyword and case insensitive).
+
+1. **_Button Click Flow_**: Update the `toHaveClass` to the new color class names for before and after click (i.e. `expect(buttonElement).toHaveClass("medium-violet-red");`).
+2. **_Checkbox Flow_**: Update the `toHaveClass` to the new color class names for checkbox click to re-enable button.
+3. **_Checkbox Flow After Button Clicked_**: Update the `toHaveClass` to the new color class names for checkbox click to re-enable button.
+
+`App.jsx`
+
+1. Create new constant for next color and title case and assign it to kebab case helper function with `nextColor` passed in as an _argument_. This applies the helper function to whatever the next color is.
+2. Update the `nextColor` constant name to `nextColorClass`.
+3. For the button text content change `{nextColor}` to `{nextColorTitleCase}`.
+
+### Module: When to Unit Test
+
+- If the logic is complex and difficult to test via functional tests.
+- If there are too many _edge cases_.
+- When determining what caused a functional test to fail.
+- Functional tests are high level which makes them resistant to refactored code, which is good, except when you are trying to diagnose when a test fails.
+
+### Module: Recap Color Button Checkbox App
+
+- Test interactivity from `fireEvent`, an object imported from RTL that has methods on it like `click`.
+- Used several new **jest-DOM** _assertions_:
+  - `toBeEnabled()`
+  - `toBeDisabled()`
+  - `toBeChecked()` (Note: We used `.not.toBeChecked()` for the opposite)
+- We used the `name` **option** for `getByRole` to identify which checkbox and which button we were referring to.
+- We used the `describe` global from Vitest to group tests into logical groups.
+- Discussed _unit testing_ functions, demoed, and talked about when to use them.
